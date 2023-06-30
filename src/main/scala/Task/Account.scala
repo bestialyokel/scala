@@ -1,6 +1,5 @@
 package Task
 
-import java.nio.file.attribute.UserPrincipalNotFoundException
 import scala.util.{Success, Try, Failure}
 
 class UserNotUsingSocialNetworkException(msg: String) extends Exception(msg)
@@ -11,7 +10,7 @@ case class Account(id: String, socialNetworks: Seq[SocialNetwork]) {
             println(s"пост в ${socialNetwork.name}")
             Success()
         } else {
-            Failure(new UserPrincipalNotFoundException(s"user ${id} not using ${socialNetwork.name}"))
+            Failure(new UserNotUsingSocialNetworkException(s"user ${id} not using ${socialNetwork.name}"))
         }
     }
 }
