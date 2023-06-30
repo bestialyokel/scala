@@ -60,7 +60,11 @@ class AccountCacheImpl(val repository: AccountRepository, override val cacheEntr
     }
 
     override def updateEntry(cacheEntry: CacheEntry): Option[CacheEntry] = repository.getById(cacheEntry.account.id) match {
-        case Some(account) => hashMap.put(account.id, CacheEntry(account, getCurrentTs()))
+        case Some(account) => {
+            val entry = CacheEntry(account, getCurrentTs())
+            hashMap.put(account.id, entry)
+            Some(entry)
+        }
         case None => None
     }
 }
