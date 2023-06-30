@@ -7,7 +7,7 @@ abstract class AccountRepository {
     def put(account: Account): Option[Account]
     def bulkLoad(seq: Seq[Account]): Seq[Option[Account]] = seq.map( put )
 
-    def values: Seq[Account]
+    def count: Int
 }
 
 class AccountRepositoryImpl extends AccountRepository {
@@ -15,10 +15,12 @@ class AccountRepositoryImpl extends AccountRepository {
 
     def getById(id: String): Option[Account] = hashMap.get(id)
 
+    // Return Some if account with same already exist(new account not added)
+    // None if account successfuly added
     def put(account: Account): Option[Account] = hashMap.get(account.id) match {
         case Some(account) => Some(account)
         case None => hashMap.put(account.id, account)
     }
 
-    def values = hashMap.values.toSeq
+    def count = hashMap.values.toSeq.length
 }

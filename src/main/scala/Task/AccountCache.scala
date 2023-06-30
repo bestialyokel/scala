@@ -9,6 +9,8 @@ abstract class AccountCache(val cacheEntryTTL: Long) {
 
     def getById(id: String): Option[Account]
 
+    def expiredById(id: String): Boolean
+
     def postInstagram(): Unit
 
     protected def entryOverdue(entry: CacheEntry): Boolean
@@ -30,8 +32,15 @@ class AccountCacheImpl(val repository: AccountRepository, override val cacheEntr
         }
     }
 
+    override def expiredById(id: String): Boolean = hashMap.get(id) match {
+        case Some(entry) => entryOverdue(entry)
+        case None => false
+    }
+
     def getCurrentTs() = System.currentTimeMillis()
 
+    // Return Some if account with same already exist(new account not added)
+    // None if account successfuly added
     override def put(account: Account) = {
         hashMap.get(account.id) match {
             case Some(entry) => Some(entry)
@@ -44,7 +53,7 @@ class AccountCacheImpl(val repository: AccountRepository, override val cacheEntr
     override def postInstagram(): Unit = {
         hashMap.values
           .filter(entry => entry.account.socialNetworks.contains(SocialNetwork.Instagram))
-          .map(entry => if (entryOverdue(entry)) Some(entry) else updateEntry(entry))
+          .map(entry => if (entryOverdue(entry)) updateEntry(entry) else Some(entry))
           .filter(_.nonEmpty)
           .map(_.get)
           .foreach(entry => entry.account.post(SocialNetwork.Instagram))
